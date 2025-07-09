@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>以動物為師：泌尿科的奇妙趣聞</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap" rel="stylesheet">
+    <!-- Tone.js CDN for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            margin: 0;
+            padding: 0.2rem; /* Further reduced overall padding */
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .header-image {
+            max-width: 120px; /* Slightly smaller image to save space */
+            height: auto;
+            margin-bottom: -0.5rem; /* Negative margin to pull it closer to the title */
+            border-radius: 0.75rem; /* Rounded corners for the image */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .page-title {
+            font-weight: 900; /* Extra bold */
+            text-align: center;
+            margin-bottom: 0.2rem; /* Reduced space below title */
+            line-height: 1.2;
+            color: #1e3a8a;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for liveliness */
+        }
+        .page-title .line1 {
+            font-size: 2.5rem; /* Slightly smaller font for title lines */
+        }
+        .page-title .line2 {
+            font-size: 2rem; /* Slightly smaller font for title lines */
+        }
+        @media (max-width: 768px) {
+            .header-image {
+                max-width: 80px; /* Smaller on mobile */
+            }
+            .page-title .line1 {
+                font-size: 1.8rem;
+            }
+            .page-title .line2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .instructions {
+            color: #334155;
+            font-size: 1.1rem;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.85); /* Slightly less transparent */
+            padding: 0.6rem 1.2rem; /* Reduced padding */
+            border-radius: 0.75rem;
+            margin-top: 0.3rem; /* Reduced space above instructions */
+            margin-bottom: 0.6rem; /* Reduced space below instructions */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-container {
+            position: relative;
+            width: 90vw;
+            max-width: 900px;
+            padding-bottom: 90%;
+            background-image: url('https://i.postimg.cc/HLrKphpj/1752077963456.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .hotspot {
+            position: absolute;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background-color 0.3s ease, transform 0.1s ease-out; /* Add transform for subtle click effect */
+            background-color: rgba(0, 0, 0, 0); /* Fully transparent by default */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .hotspot:hover {
+            background-color: rgba(255, 255, 255, 0.3); /* Subtle highlight on hover */
+            transform: scale(1.02); /* Slightly enlarge on hover */
+        }
+        .hotspot:active {
+            transform: scale(0.98); /* Shrink on click */
+        }
+        .hotspot.found {
+            background-color: rgba(100, 180, 255, 0.4); /* Light blue for found items */
+            border: 2px solid #3b82f6; /* Blue border */
+        }
+
+        /* Specific hotspot positioning (adjusted for the new image) */
+        #whale-hotspot { top: 10%; left: 25%; width: 50%; height: 25%; }
+        #bat-hotspot { top: 12%; left: 78%; width: 15%; height: 10%; }
+        #camel-hotspot { top: 30%; left: 5%; width: 20%; height: 35%; }
+        #elephant-hotspot { top: 38%; left: 38%; width: 20%; height: 28%; }
+        #chameleon-hotspot { top: 30%; left: 72%; width: 15%; height: 20%; }
+        #penguin1-hotspot { top: 65%; left: 15%; width: 10%; height: 15%; } /* Left penguin */
+        #penguin2-hotspot { top: 52%; left: 65%; width: 10%; height: 15%; } /* Right penguin */
+        #kangaroo-hotspot { top: 48%; left: 78%; width: 15%; height: 25%; }
+        #hippo-hotspot { top: 60%; left: 45%; width: 20%; height: 25%; }
+        #beaver-hotspot { top: 75%; left: 75%; width: 15%; height: 15%; }
+        #bird-hotspot { top: 15%; left: 15%; width: 10%; height: 10%; } /* General birds on left */
+        #mammal-hotspot { top: 60%; left: 28%; width: 10%; height: 10%; } /* Near the cat on the desk */
+
+        /* Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .close-button:hover {
+            color: #1e3a8a;
+        }
+
+        /* Stopwatch specific styles */
+        .stopwatch-container {
+            text-align: center;
+            margin-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        .stopwatch-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 1rem;
+        }
+        .stopwatch-buttons button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin: 0 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+        .stopwatch-buttons button:hover {
+            background-color: #2563eb;
+        }
+        .stopwatch-buttons button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Container for counter and reset button */
+        .bottom-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0.6rem; /* Adjusted margin-top to pull it up */
+        }
+
+        .found-counter-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1e3a8a;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-right: 1rem; /* Space between counter and button */
+        }
+
+        .reset-button {
+            background-color: #3b82f6; /* Blue color for reset */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .reset-button:hover {
+            background-color: #2563eb; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <img src="https://i.postimg.cc/y8Vb1Jkb/1752081440038.png" alt="動物泌尿科圖示" class="header-image">
+
+    <div class="page-title">
+        <div class="line1">以動物為師</div>
+        <div class="line2">泌尿科的奇妙趣聞</div>
+    </div>
+
+    <div class="instructions">
+        點擊圖片中的動物，探索牠們的泌尿科趣聞！你能找出幾種動物呢？
+    </div>
+
+    <div class="image-container">
+        <!-- Hotspots for each animal (no text displayed) -->
+        <div id="whale-hotspot" class="hotspot" onclick="showFact('whale')"></div>
+        <div id="bat-hotspot" class="hotspot" onclick="showFact('bat')"></div>
+        <div id="camel-hotspot" class="hotspot" onclick="showFact('camel')"></div>
+        <div id="elephant-hotspot" class="hotspot" onclick="showFact('elephant')"></div>
+        <div id="chameleon-hotspot" class="hotspot" onclick="showFact('chameleon')"></div>
+        <div id="penguin1-hotspot" class="hotspot" onclick="showFact('penguin')"></div> <!-- Left penguin -->
+        <div id="penguin2-hotspot" class="hotspot" onclick="showFact('penguin')"></div> <!-- Right penguin -->
+        <div id="kangaroo-hotspot" class="hotspot" onclick="showFact('kangaroo')"></div>
+        <div id="hippo-hotspot" class="hotspot" onclick="showFact('hippo')"></div>
+        <div id="beaver-hotspot" class="hotspot" onclick="showFact('beaver')"></div>
+        <div id="bird-hotspot" class="hotspot" onclick="showFact('bird')"></div>
+        <div id="mammal-hotspot" class="hotspot" onclick="showFact('mammal')"></div>
+    </div>
+
+    <div class="bottom-controls">
+        <div id="foundCounter" class="found-counter-display">
+            0 / 11
+        </div>
+        <button class="reset-button" onclick="resetGame()">重置遊戲</button>
+    </div>
+
+    <!-- Modal for displaying facts -->
+    <div id="factModal" class="modal-overlay" onclick="hideFact()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-button" onclick="hideFact()">✕</button>
+            <h3 id="modalTitle" class="text-2xl font-bold mb-4 text-blue-700"></h3>
+            <p id="modalContent" class="text-base text-gray-700 leading-relaxed"></p>
+            <!-- Stopwatch container, hidden by default -->
+            <div id="stopwatchContainer" class="stopwatch-container hidden">
+                <div id="stopwatchDisplay" class="stopwatch-display">00:00</div>
+                <div class="stopwatch-buttons">
+                    <button id="startButton" onclick="startStopwatch()">開始</button>
+                    <button id="stopButton" onclick="stopStopwatch()" disabled>停止</button>
+                    <button id="resetButton" onclick="resetStopwatch()" disabled>重置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tone.js Synth for the ticking sound
+        let tickSynth = null;
+        let tickLoop = null;
+
+        // Stopwatch variables
+        let timer;
+        let seconds = 0;
+        let isRunning = false;
+
+        // Set to store unique animal keys that have been found
+        const foundAnimals = new Set();
+        const totalAnimals = 11; // Total number of unique animals
+
+        // Function to format time
+        function formatTime(sec) {
+            const minutes = Math.floor(sec / 60);
+            const remainingSeconds = sec % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Function to update stopwatch display
+        function updateStopwatch() {
+            seconds++;
+            document.getElementById('stopwatchDisplay').textContent = formatTime(seconds);
+        }
+
+        // Initialize Tone.js synth for ticking sound
+        function initTickSound() {
+            if (!tickSynth) {
+                // Tone.start() must be called to enable audio
+                Tone.start();
+                tickSynth = new Tone.MembraneSynth({
+                    pitchDecay: 0.008,
+                    octaves: 1,
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.1,
+                        sustain: 0,
+                        release: 0.01,
+                        attackCurve: "exponential"
+                    },
+                    oscillator: {
+                        type: "sine"
+                    }
+                }).toDestination();
+            }
+        }
+
+        // Start stopwatch
+        function startStopwatch() {
+            if (!isRunning) {
+                initTickSound(); // Ensure synth is initialized and audio context started
+                isRunning = true;
+                timer = setInterval(updateStopwatch, 1000);
+
+                // Start Tone.js loop for ticking sound
+                if (tickLoop) Tone.Transport.stop(); // Stop previous loop if any
+                tickLoop = new Tone.Loop(time => {
+                    tickSynth.triggerAttackRelease("C2", "8n", time); // Play a low C note for a short duration
+                }, "1n").start(0); // "1n" means every whole note, effectively every second
+                Tone.Transport.start(); // Start the transport to make the loop run
+
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('stopButton').disabled = false;
+                document.getElementById('resetButton').disabled = false;
+            }
+        }
+
+        // Stop stopwatch
+        function stopStopwatch() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timer);
+                if (tickLoop) {
+                    tickLoop.stop();
+                    Tone.Transport.stop(); // Stop the transport
+                }
+                document.getElementById('startButton').disabled = false;
+                document.getElementById('stopButton').disabled = true;
+            }
+        }
+
+        // Reset stopwatch
+        function resetStopwatch() {
+            stopStopwatch();
+            seconds = 0;
+            document.getElementById('stopwatchDisplay').textContent = formatTime(seconds);
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+            document.getElementById('resetButton').disabled = true;
+            if (tickLoop) {
+                tickLoop.dispose(); // Dispose loop on full reset
+                tickLoop = null;
+            }
+        }
+
+        // Function to update the found counter display
+        function updateFoundCounter() {
+            document.getElementById('foundCounter').textContent = `${foundAnimals.size} / ${totalAnimals}`;
+        }
+
+        // Function to reset the entire game
+        function resetGame() {
+            foundAnimals.clear(); // Clear the set of found animals
+            // Remove 'found' class from all hotspots
+            const hotspots = document.querySelectorAll('.hotspot');
+            hotspots.forEach(hotspot => {
+                hotspot.classList.remove('found');
+            });
+            updateFoundCounter(); // Reset the counter display
+            hideFact(); // Close modal and reset stopwatch if open
+        }
+
+        // Define facts for each animal/category
+        const facts = {
+            whale: {
+                title: '🐋 鯨魚與海豚的泌尿奇蹟',
+                content: '海豚擁有極其高效的腎臟系統，能夠從海水中提取淡水並排出高濃度的鹽分。牠們的腎臟濃縮能力比人類強好幾倍，這對研究腎臟疾病和水電解質平衡很有啟發性。鯨魚可以長時間憋尿，有些種類能憋數小時。牠們的膀胱結構和神經控制系統為治療人類尿失禁提供了研究方向。',
+                hasStopwatch: false
+            },
+            bat: {
+                title: '🦇 蝙蝠的倒掛排尿',
+                content: '蝙蝠能夠在倒掛狀態下正常排尿，這涉及特殊的肌肉控制和重力適應機制，對微重力環境下的泌尿系統研究很有價值。儘管倒掛，蝙蝠的泌尿系統仍能有效運作，這對微重力環境下的泌泌尿系統研究（例如太空人）很有價值，探討重力對生理的影響。',
+                hasStopwatch: false
+            },
+            camel: {
+                title: '🐪 駱駝：沙漠中的省水專家',
+                content: '駱駝的腎臟擁有超長的腎小管，能最大限度地重吸收水分，排出極其濃縮的尿液，有時甚至呈膏狀。這種「滴水不漏」的生存機制，對於研究腎臟濃縮功能和治療人類脫水症狀提供了獨特的視角。駱駝能承受體重25%的水分流失而不影響生命，牠們的尿液比海水鹹兩倍。',
+                hasStopwatch: false
+            },
+            elephant: {
+                title: '🐘 大象的「小型瀑布」',
+                content: '在亞特蘭大動物園，非洲象會在每天固定時間排尿，尿液水柱高且強勁，像小型瀑布一樣，水花閃耀陽光，讓人感受到自然界泌尿系統的壯觀與規律。大象龐大的體型意味著其膀胱容量巨大，排尿時需要強大的膀胱壓力才能將大量尿液迅速排出。',
+                hasStopwatch: false
+            },
+            chameleon: {
+                title: '🦎 變色龍的「皮膚腎臟」',
+                content: '有些變色龍除了腎臟，還在頭部或眼睛附近擁有特殊的「排鹽腺」。當體內鹽分過高時，這些腺體會分泌出高濃度的鹽水，如同流汗一般排出多餘的鹽分。這展示了生物體在面對特殊環境壓力時，泌尿排泄方式的多元化與靈活性。',
+                hasStopwatch: false
+            },
+            penguin: { /* This is the key for the fact content */
+                title: '🐧 企鵝的「鼻孔排鹽」',
+                content: '企鵝有特殊的鹽腺來處理過量的鹽分，這個系統比腎臟更有效率。牠們會從鼻孔排出高濃度的鹽水，這種機制啟發了人工腎臟設計的研究。鹽腺位於企鵝眼睛上方，能將血液中的鹽分過濾並濃縮排出，讓企鵝可以飲用海水。',
+                hasStopwatch: false
+            },
+            kangaroo: {
+                title: '🦘 袋鼠的「水分回收廠」',
+                content: '袋鼠在乾旱環境中能極度濃縮尿液以保存水分，牠們的腎臟濃縮能力啟發了腎臟透析技術的改進。袋鼠的腎臟能產生比血液滲透壓高數倍的尿液，這讓牠們在缺水時能最大限度地回收體內水分。',
+                hasStopwatch: false
+            },
+            hippo: {
+                title: '🦛 河馬的「天然防曬乳」',
+                content: '河馬會分泌一種紅色的液體，起初被誤認為是血汗，後來發現這是含有天然防曬成分的分泌物。這種物質能保護河馬免受紫外線傷害，為皮膚保護研究提供了新思路。這種液體含有「河馬酸」和「紅河馬酸」，具有抗菌和防曬功能。',
+                hasStopwatch: false
+            },
+            beaver: {
+                title: '🦫 河狸：築巢與標記的「多功能排泄物」',
+                content: '河狸會利用自己的尿液和腺體分泌物混合而成的「海狸香」（castoreum）來標記領地。這種物質不僅氣味濃烈，過去甚至被用於香水和食品調味劑。此外，牠們的排泄物有時也會被納入牠們的建築材料中，體現了動物對資源的充分利用。',
+                hasStopwatch: false
+            },
+            bird: {
+                title: '🐍🐦 爬行動物與鳥類的「固體尿」',
+                content: '許多爬行動物（如蛇、蜥蜴）和鳥類（尤其是沙漠鳥類）不像我們一樣排出液態尿液。牠們的身體能將多餘的氮廢物轉化為不溶於水的尿酸，並以白色固體或半固體的「結晶尿」形式排出。這種方式幾乎不需要額外水分，是極端缺水環境下的最佳適應。這也啟發了科學家對泌尿道結石成因和預防的研究。',
+                hasStopwatch: false
+            },
+            mammal: {
+                title: '⏱️ 哺乳動物的「21秒定律」',
+                content: '美國佐治亞理工學院的胡立德教授團隊使用高速攝影機拍攝多種哺乳動物（如老鼠、山羊、牛、大象、狗等）的排尿過程，發現只要體重超過3公斤，哺乳動物的尿尿時間都約為21秒左右。這項研究獲得了搞笑諾貝爾物理學獎，顯示不同體型的哺乳動物排尿時間竟然非常接近，這是流體動力學的巧妙結果。您可以點擊下方的按鈕，嘗試計時21秒！',
+                hasStopwatch: true
+            }
+        };
+
+        // Mapping for hotspots that share the same fact but need individual highlighting
+        const sharedFactHotspots = {
+            'penguin': ['penguin1-hotspot', 'penguin2-hotspot']
+        };
+
+        function showFact(animalKey) {
+            const modal = document.getElementById('factModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            const stopwatchContainer = document.getElementById('stopwatchContainer');
+
+            const fact = facts[animalKey];
+            if (fact) {
+                modalTitle.textContent = fact.title;
+                modalContent.textContent = fact.content;
+
+                // Handle shared fact hotspots
+                if (sharedFactHotspots[animalKey]) {
+                    sharedFactHotspots[animalKey].forEach(hotspotId => {
+                        const hotspotElement = document.getElementById(hotspotId);
+                        if (!foundAnimals.has(hotspotId)) { // Use hotspotId as unique key for foundAnimals
+                            foundAnimals.add(hotspotId);
+                            hotspotElement.classList.add('found');
+                        }
+                    });
+                } else {
+                    // For single-hotspot animals
+                    const hotspotElement = document.getElementById(animalKey + '-hotspot');
+                    if (!foundAnimals.has(animalKey)) {
+                        foundAnimals.add(animalKey);
+                        hotspotElement.classList.add('found');
+                    }
+                }
+                updateFoundCounter();
+
+
+                if (fact.hasStopwatch) {
+                    stopwatchContainer.classList.remove('hidden');
+                    resetStopwatch(); // Reset stopwatch when showing this fact
+                } else {
+                    stopwatchContainer.classList.add('hidden');
+                    stopStopwatch(); // Ensure stopwatch is stopped if not needed
+                }
+
+                modal.classList.add('show');
+            }
+        }
+
+        function hideFact() {
+            const modal = document.getElementById('factModal');
+            modal.classList.remove('show');
+            // Stop and reset stopwatch when modal is hidden
+            stopStopwatch();
+            seconds = 0;
+            document.getElementById('stopwatchDisplay').textContent = formatTime(seconds);
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+            document.getElementById('resetButton').disabled = true;
+            document.getElementById('stopwatchContainer').classList.add('hidden'); // Hide container
+        }
+
+        // Optional: Close modal if escape key is pressed
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideFact();
+            }
+        });
+
+        // Initialize counter display on page load
+        document.addEventListener('DOMContentLoaded', updateFoundCounter);
+    </script>
+</body>
+</html>
+
